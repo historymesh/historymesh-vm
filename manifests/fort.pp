@@ -3,6 +3,7 @@ file { "/etc/apt/sources.list.d/fort.list":
     owner   => "root",
     group   => "root",
     content => template("apt/fort.list"),
+    before  => Exec["apt-get-update"],
     notify  => Exec["apt-get-update"],
 }
 
@@ -11,3 +12,9 @@ exec { "apt-get-update":
     refreshonly => true,
 }
 
+$packages = ["postgresql", "python-psycopg2"]
+
+package { $packages:
+    require => Exec["apt-get-update"],
+    ensure  => present,
+}
