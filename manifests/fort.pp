@@ -17,9 +17,37 @@ exec { "apt-get-update":
     refreshonly => true,
 }
 
-$packages = ["postgresql", "python-psycopg2"]
+file { "/home/vagrant/.gemrc":
+    ensure  => present,
+    owner   => "vagrant",
+    group   => "vagrant",
+    content => template("rubygems/gemrc"),
+}
+
+$packages = ["postgresql", "python-psycopg2", "rubygems1.8"]
 
 package { $packages:
     require => Exec["apt-get-update"],
     ensure  => present,
 }
+
+file { "/var/lib/gems/1.8":
+    require => Package["rubygems1.8"],
+    owner   => "root",
+    group   => "admin",
+    /* Allow anyone in the admin group to install gems */
+    mode    => "0775",
+}
+
+$gem_source = "http://gems.fort"
+
+define gem() {
+    exec { "/usr/bin/gem install --source ${gem_source} ${name}":
+        /* Don't bother if we already have a gem by the same name */
+        unless  => "/usr/bin/gem list ${name} | /bin/grep .",
+        require => Package["rubygems1.8"],
+    }
+}
+
+
+gem { "bundler": }
