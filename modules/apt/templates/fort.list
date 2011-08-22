@@ -1,0 +1,8 @@
+deb http://ubuntu.fort/ natty main restricted
+deb-src http://ubuntu.fort/ natty main restricted
+deb http://ubuntu.fort/ natty-updates main restricted
+deb-src http://ubuntu.fort/ natty-updates main restricted
+deb http://ubuntu.fort/ natty-backports main restricted
+deb-src http://ubuntu.fort/ natty-backports main restricted
+deb http://ubuntu.fort/ natty-proposed main restricted
+deb-src http://ubuntu.fort/ natty-proposed main restricted
