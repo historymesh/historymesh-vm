@@ -1,4 +1,9 @@
+$url = "http://ubuntu.fort/"
+$dists = ["natty", "natty-updates", "natty-backports"]
+$components = ["main", "restricted"]
+
 file { "/etc/apt/sources.list.d/fort.list":
+
     ensure  => present,
     owner   => "root",
     group   => "root",
