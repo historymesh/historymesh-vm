@@ -1,6 +1,6 @@
 $url = "http://ubuntu.fort/"
 $dists = ["natty", "natty-updates", "natty-backports"]
-$components = ["main", "restricted"]
+$components = ["main", "restricted", "universe"]
 
 file { "/etc/apt/sources.list.d/fort.list":
 
