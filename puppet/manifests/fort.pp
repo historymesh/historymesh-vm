@@ -73,3 +73,8 @@ gem { "bundler": }
 
 
 include postgres
+
+postgres::postgres_user { "antler": }
+postgres::postgres_db { "antler":
+    owner => "antler",
+}
