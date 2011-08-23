@@ -23,6 +23,10 @@ exec { "apt-get-update":
     refreshonly => true,
 }
 
+Package {
+    require => Exec["apt-get-update"],
+}
+
 if $vagrant {
     file { "/home/vagrant/.gemrc":
         ensure  => present,
@@ -43,7 +47,6 @@ $packages = ["postgresql", "python-psycopg2", "rubygems1.8", "git",
              "zlib1g-dev", "libreadline-dev", "libcurl4-openssl-dev"]
 
 package { $packages:
-    require => Exec["apt-get-update"],
     ensure  => present,
 }
 
