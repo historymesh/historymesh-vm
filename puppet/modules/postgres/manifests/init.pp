@@ -13,9 +13,21 @@ class postgres {
         require => Exec["generate-locale"],
     }
     
-    package { ["postgresql", "python-psycopg2"]:
-        require => Exec["update-locale"],
+    exec { "kick-cluster":
+        command     => "/usr/bin/pg_dropcluster --stop 8.4 main && /usr/bin/pg_createcluster --locale ${locale} --start 8.4 main",
+        refreshonly => true,
+        before      => File["/etc/postgresql/8.4/main/pg_hba.conf"],
+    }
+    
+    package { "postgresql":
+        /* TODO: look up plussignment operator, if we can use it */
+        require => [Exec["apt-get-update"], Exec["update-locale"]],
         ensure  => installed,
+        notify  => Exec["kick-cluster"],
+    }
+    
+    package { "python-psycopg2":
+        ensure => installed,
     }
     
     service { "postgresql":
