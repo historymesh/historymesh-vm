@@ -44,7 +44,7 @@ if $vagrant {
 }
 
 $packages = ["rubygems1.8", "git", "zlib1g-dev", "libreadline-dev",
-             "libcurl4-openssl-dev"]
+             "libcurl4-openssl-dev", "python-virtualenv", "python-pip"]
 
 package { $packages:
     ensure  => present,
