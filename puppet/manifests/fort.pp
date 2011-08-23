@@ -2,6 +2,12 @@ $url = "http://ubuntu.fort/"
 $dists = ["natty", "natty-updates", "natty-backports"]
 $components = ["main", "restricted", "universe"]
 
+/* Bit of a hack to tell whether we're running a Vagrant box */
+$vagrant = $domain ? {
+    "vagrantup.com" => true,
+    default         => false,
+}
+
 file { "/etc/apt/sources.list.d/fort.list":
 
     ensure  => present,
@@ -17,11 +23,13 @@ exec { "apt-get-update":
     refreshonly => true,
 }
 
-file { "/home/vagrant/.gemrc":
-    ensure  => present,
-    owner   => "vagrant",
-    group   => "vagrant",
-    content => template("rubygems/gemrc"),
+if $vagrant {
+    file { "/home/vagrant/.gemrc":
+        ensure  => present,
+        owner   => "vagrant",
+        group   => "vagrant",
+        content => template("rubygems/gemrc"),
+    }
 }
 
 $packages = ["postgresql", "python-psycopg2", "rubygems1.8", "git"]
