@@ -24,7 +24,7 @@ file { "/home/vagrant/.gemrc":
     content => template("rubygems/gemrc"),
 }
 
-$packages = ["postgresql", "python-psycopg2", "rubygems1.8"]
+$packages = ["postgresql", "python-psycopg2", "rubygems1.8", "git"]
 
 package { $packages:
     require => Exec["apt-get-update"],
