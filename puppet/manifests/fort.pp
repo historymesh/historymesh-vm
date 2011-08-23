@@ -43,8 +43,8 @@ if $vagrant {
     }
 }
 
-$packages = ["postgresql", "python-psycopg2", "rubygems1.8", "git",
-             "zlib1g-dev", "libreadline-dev", "libcurl4-openssl-dev"]
+$packages = ["rubygems1.8", "git", "zlib1g-dev", "libreadline-dev",
+             "libcurl4-openssl-dev"]
 
 package { $packages:
     ensure  => present,
