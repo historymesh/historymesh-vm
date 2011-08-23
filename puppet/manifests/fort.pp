@@ -30,6 +30,13 @@ if $vagrant {
         group   => "vagrant",
         content => template("rubygems/gemrc"),
     }
+    
+    file { "/home/vagrant/.bash_aliases":
+        ensure  => present,
+        owner   => "vagrant",
+        group   => "vagrant",
+        content => "alias st='git status'",
+    }
 }
 
 $packages = ["postgresql", "python-psycopg2", "rubygems1.8", "git"]
