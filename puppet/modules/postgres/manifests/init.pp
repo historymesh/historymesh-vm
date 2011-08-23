@@ -56,7 +56,7 @@ class postgres {
     define postgres_db($owner, $encoding='UTF-8') {
         exec { "createdb -U postgres -O ${owner} -E ${encoding} ${name}":
             path    => "/usr/bin",
-            require => Service["postgresql"],
+            require => [Service["postgresql"], Postgres::Postgres_user["${owner}"]],
             /* Shamelessly nicked from Artfinder: mwaahaahaa */
             unless => "test \$(psql -U postgres -tA -c \"SELECT count(*)=1 FROM pg_catalog.pg_database where datname='${name}';\") = t",
         }
