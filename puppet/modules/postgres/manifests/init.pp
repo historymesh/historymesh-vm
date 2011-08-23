@@ -53,8 +53,8 @@ class postgres {
         }
     }
 
-    define postgres_db() {
-        exec { "createdb -U postgres ${name}":
+    define postgres_db($owner, $encoding='UTF-8') {
+        exec { "createdb -U postgres -O ${owner} -E ${encoding} ${name}":
             path    => "/usr/bin",
             require => Service["postgresql"],
             /* Shamelessly nicked from Artfinder: mwaahaahaa */
