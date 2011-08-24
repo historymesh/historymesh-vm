@@ -44,7 +44,7 @@ if $vagrant {
 }
 
 $packages = ["rubygems1.8", "git", "zlib1g-dev", "libreadline-dev",
-             "libcurl4-openssl-dev", "python-virtualenv", "python-pip"]
+             "libcurl4-openssl-dev"]
 
 package { $packages:
     ensure  => present,
@@ -78,3 +78,8 @@ postgres::postgres_user { "antler": }
 postgres::postgres_db { "antler":
     owner => "antler",
 }
+
+include pip
+
+pip::pip_package { "virtualenv": version => "1.6.4"}
+
