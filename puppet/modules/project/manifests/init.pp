@@ -24,7 +24,7 @@ class project {
         }
     }
     
-    define vagrant_dev($active=false, $links=[], $share_name=null) {
+    define vagrant_dev($active=false, $links=[], $link_prefix="") {
         /* Vagrant development project */
         
         if $active {
@@ -45,18 +45,18 @@ class project {
         }
         
         project::vagrant_link { $links:
-            project    => "${name}",
-            share_name => $share_name ? {
-                            null => "${name}",
-                            default => "${share_name}"
-                          },
+            project => "${name}",
+            prefix  => "${link_prefix}",
         }
     }
     
-    define vagrant_link($project, $share_name="${project}") {
+    define vagrant_link($project, $prefix="") {
         file { "vagrant_${project}_${name}":
             path   => "/home/${project}/releases/dev/${name}",
-            ensure => "/home/vagrant/${share_name}/${name}",
+            ensure => $prefix ? {
+                ""      => "/home/vagrant/${name}",
+                default => "/home/vagrant/${prefix}/${name}"
+            },
         }
     }
 }
