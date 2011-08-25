@@ -50,7 +50,6 @@ class project {
                             null => "${name}",
                             default => "${share_name}"
                           },
-            before     => Exec["init-bugle-ve"],
         }
     }
     
