@@ -95,7 +95,7 @@ if $vagrant {
         cwd     => "${dev_path}",
         require => [Pip::Pip_package["virtualenv"]],
         creates => "${dev_path}/antler_ve",
-        # before  => Apache::Wsgi_host["antler"],
+        before  => Apache::Wsgi_host["antler"],
     }
 }
 
@@ -103,3 +103,11 @@ include pip
 
 pip::pip_package { "virtualenv": version => "1.6.4"}
 
+$current_release_path = "/home/antler/releases/current"
+
+include apache
+
+apache::wsgi_host { "antler":
+    host      => 'antler.dev',
+    wsgi_path => "${current_release_path}/antler/configs/development/antler.wsgi",
+}
