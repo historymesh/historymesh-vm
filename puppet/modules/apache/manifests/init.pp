@@ -14,11 +14,13 @@ class apache {
             group   => root,
             mode    => "644",
             content => template("apache/wsgi_host"),
-            notify => Service["apache2"],
+            notify  => Service["apache2"],
+            require => Package["apache2"],
         }
         file { "/etc/apache2/sites-enabled/${name}":
-            ensure => "/etc/apache2/sites-available/${name}",
-            notify => Service["apache2"],
+            ensure  => "/etc/apache2/sites-available/${name}",
+            require => File["/etc/apache2/sites-available/${name}"],
+            notify  => Service["apache2"],
         }
         
         host { "${host}":
