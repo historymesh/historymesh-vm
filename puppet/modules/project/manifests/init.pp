@@ -22,6 +22,14 @@ class project {
             group   => "admin",
             mode    => "775",
         }
+        
+        file { "/home/${name}/${name}":
+            ensure  => file,
+            owner   => "${name}",
+            group   => "admin",
+            mode    => "775",
+            content => "releases/current/${name}_ve/bin/python releases/current/${name}/manage.py $*",
+        }
     }
     
     define vagrant_dev($active=false, $links=[], $link_prefix="") {
