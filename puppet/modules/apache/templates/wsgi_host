@@ -1,0 +1,10 @@
+<VirtualHost *:80>
+    ServerName <%= host %>
+    <% aliases.each do |server_alias| -%>
+    ServerAlias <%= server_alias %>
+    <% end -%>
+    WSGIPassAuthorization On
+    WSGIScriptAlias / <%= wsgi_path %>
+        ErrorLog /var/log/apache2/<%= name %>-error.log
+        CustomLog /var/log/apache2/<%= name %>-access.log combined
+</VirtualHost>
