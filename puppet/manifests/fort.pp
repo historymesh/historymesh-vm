@@ -105,6 +105,14 @@ if $vagrant {
         creates => "${dev_path}/antler_ve",
         before  => Apache::Wsgi_host["antler"],
     }
+    
+    file { "/home/antler/regenerate.py":
+        ensure  => file,
+        owner   => "antler",
+        group   => "admin",
+        mode    => "0755",
+        content => template("project/regenerate.py"),
+    }
 }
 
 include pip
