@@ -68,15 +68,35 @@ define gem() {
     }
 }
 
-
 gem { "bundler": }
-
 
 include postgres
 
 postgres::postgres_user { "antler": }
 postgres::postgres_db { "antler":
     owner => "antler",
+}
+
+include project
+
+project::project { "antler": }
+
+if $vagrant {
+    project::vagrant_dev { "antler":
+        active      => true,
+        links       => ["antler", "init_virtualenv.sh"],
+        link_prefix => "fort6",
+    }
+    
+    $dev_path = "/home/antler/releases/dev"
+    
+    exec { "init-antler-ve":
+        command => "${dev_path}/init_virtualenv.sh antler",
+        cwd     => "${dev_path}",
+        require => [Pip::Pip_package["virtualenv"]],
+        creates => "${dev_path}/antler_ve",
+        # before  => Apache::Wsgi_host["antler"],
+    }
 }
 
 include pip
