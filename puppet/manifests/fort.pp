@@ -35,6 +35,14 @@ if $vagrant {
         content => template("rubygems/gemrc"),
     }
     
+    file { "/home/vagrant/kick":
+        ensure  => file,
+        owner   => "vagrant",
+        group   => "vagrant",
+        mode    => "0755",
+        content => "sudo /etc/init.d/apache2 restart",
+    }
+    
     file { "/home/vagrant/.bash_aliases":
         ensure  => present,
         owner   => "vagrant",
