@@ -45,8 +45,12 @@ class postgres {
         notify  => Service["postgresql"],
     }
 
-    define postgres_user() {
-        exec { "/usr/bin/createuser -U postgres -SDR ${name}":
+    define postgres_user($create_db=false) {
+        $flags = $create_db ? {
+            true  => "SdR",
+            false => "SDR",
+        }
+        exec { "/usr/bin/createuser -U postgres -${flags} ${name}":
             /* No super-user, no create DB, no create roles */
             require => Service["postgresql"],
             unless  => "/usr/bin/psql -U ${name} -l",
