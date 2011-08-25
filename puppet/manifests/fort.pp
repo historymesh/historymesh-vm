@@ -92,7 +92,7 @@ project::project { "antler": }
 if $vagrant {
     project::vagrant_dev { "antler":
         active      => true,
-        links       => ["antler", "init_virtualenv.sh"],
+        links       => ["antler", "init_virtualenv.sh", "pipe_runner.conf"],
         link_prefix => "fort6",
     }
     
@@ -118,4 +118,73 @@ include apache
 apache::wsgi_host { "antler":
     host      => 'antler.dev',
     wsgi_path => "${current_release_path}/antler/configs/development/antler.wsgi",
+}
+
+
+/* Norm's crazy CSS weirdness */
+
+package { ["curl", "perl"]:
+    ensure => installed,
+    before => Exec["setup-cpanm"],
+}
+
+exec { "download-cpanm":
+    require => Package["curl"],
+    command => "/usr/bin/curl http://cpan.fort/cpanm >/tmp/cpanm",
+    creates => "/tmp/cpanm",
+}
+
+exec { "setup-cpanm":
+    require => [Exec["download-cpanm"], Package["perl"]],
+    command => "/usr/bin/perl /tmp/cpanm --self-upgrade --mirror http://cpan.fort/ --mirror-only",
+    creates => "/usr/local/bin/cpanm",
+}
+
+define cpan_module() {
+    exec { "cpan-module-${name}":
+        require => Exec["setup-cpanm"],
+        command => "/usr/local/bin/cpanm -f --mirror http://cpan.fort/ --mirror-only ${name}",
+        unless  => "/usr/bin/perl -e 'require ${name}'",
+    }
+}
+
+$modules = ["CSS::Prepare", "JavaScript::Prepare", "Capture::Tiny",
+            "Config::Std", "Proc::Fork"]
+
+cpan_module { $modules: }
+
+$pipe_runner = "/usr/local/bin/pipe_runner"
+
+exec { "download-pipe-runner":
+    command => "/usr/bin/curl http://cpan.fort/pipe_runner >${pipe_runner}",
+    creates => "${pipe_runner}",
+}
+
+file { "${pipe_runner}":
+    owner   => "root",
+    group   => "admin",
+    mode    => "0755",
+    require => Exec["download-pipe-runner"],
+}
+
+package { "supervisor": ensure => installed }
+
+service { "supervisor": ensure => running }
+
+define supervisor_process($command, $directory='') {
+    file { "/etc/supervisor/conf.d/${name}.conf":
+        ensure  => file,
+        owner   => "root",
+        group   => "root",
+        mode    => "0644",
+        content => template("supervisor/process"),
+        
+        require => Package["supervisor"],
+        notify  => Service["supervisor"],
+    }
+}
+
+supervisor_process { "pipe_runner":
+    command   => "${pipe_runner} pipe_runner.conf",
+    directory => "${current_release_path}",
 }
