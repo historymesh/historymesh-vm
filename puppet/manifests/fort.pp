@@ -92,7 +92,7 @@ project::project { "antler": }
 if $vagrant {
     project::vagrant_dev { "antler":
         active      => true,
-        links       => ["antler", "init_virtualenv.sh"],
+        links       => ["antler", "init_virtualenv.sh", "pipe_runner.conf"],
         link_prefix => "fort6",
     }
     
