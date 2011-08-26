@@ -92,7 +92,7 @@ project::project { "antler": }
 if $vagrant {
     project::vagrant_dev { "antler":
         active      => true,
-        links       => ["antler", "init_virtualenv.sh", "pipe_runner.conf"],
+        links       => ["antler", "init_virtualenv.sh", "pipe_runner.conf", "restpose.init"],
         link_prefix => "fort6",
     }
     
@@ -194,3 +194,25 @@ file { "/usr/local/bin/pipe_runner":
 }
 
 
+# restpose
+
+package { ["libxapian-dev", "uuid-dev", "libgcrypt11", "libgcrypt11-dev"]:
+  ensure => present
+}
+
+$restpose = "restpose-0.7.2"
+
+exec { "extract-restpose":
+    require => [Package["libxapian-dev"], Package["uuid-dev"], Package["libgcrypt11"], Package["libgcrypt11-dev"], Package["curl"]],
+    command => "/usr/bin/curl -O http://assets.fort/sources.downloaded/restpose/${restpose}.tar.gz && /bin/tar xvf restpose-0.7.2.tar.gz",
+    cwd => "/tmp",
+    before => Exec["build-restpose"],
+    unless => "/usr/bin/test -f /usr/local/bin/restpose"
+}
+
+exec { "build-restpose":
+    require => Exec["extract-restpose"],
+    command => "/tmp/${restpose}/configure && /usr/bin/make install",
+    cwd => "/tmp/${restpose}",
+    creates => "/usr/local/bin/restpose"
+}
