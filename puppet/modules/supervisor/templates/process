@@ -1,0 +1,5 @@
+[program:<%= name %>]
+command = <%= command %>
+<% if directory != "" %>
+directory = <%= directory %>
+<% end %>
