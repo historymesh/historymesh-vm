@@ -52,7 +52,7 @@ if $vagrant {
 }
 
 $packages = ["rubygems1.8", "git", "zlib1g-dev", "libreadline-dev",
-             "libcurl4-openssl-dev", "python-imaging"]
+             "libcurl4-openssl-dev", "python-imaging", "gcc"]
 
 package { $packages:
     ensure  => present,
@@ -101,7 +101,7 @@ if $vagrant {
     exec { "init-antler-ve":
         command => "${dev_path}/init_virtualenv.sh antler",
         cwd     => "${dev_path}",
-        require => [Pip::Pip_package["virtualenv"]],
+        require => [Pip::Pip_package["virtualenv"], Package["gcc"]],
         creates => "${dev_path}/antler_ve",
         before  => Apache::Wsgi_host["antler"],
     }
