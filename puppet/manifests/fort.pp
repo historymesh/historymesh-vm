@@ -111,13 +111,25 @@ if $vagrant {
         cwd     => "${dev_path}",
         require => [Exec["init-antler-ve"], File["/home/antler/releases/dev"]]
     }
-    
+
+    exec { "antler-load-data":
+        command => "${dev_path}/antler_ve/bin/python ${dev_path}/antler/manage.py loaddata live_data && touch /home/antler/loadData",
+        cwd     => "${dev_path}",
+        require => [Exec["migrate-antler-db"]],
+        creates => "/home/antler/loadData"
+    }
+
     file { "/home/antler/regenerate.py":
         ensure  => file,
         owner   => "antler",
         group   => "admin",
         mode    => "0755",
         content => template("project/regenerate.py"),
+    }
+
+    exec { "antler-asset-regenerate":
+      command => "/home/antler/regenerate.py ${dev_path}/pipe_runner.conf",
+      require => File["/usr/local/bin/pipe_runner"]
     }
 
 
