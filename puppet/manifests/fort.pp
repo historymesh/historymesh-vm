@@ -97,13 +97,19 @@ if $vagrant {
     }
     
     $dev_path = "/home/antler/releases/dev"
-    
+
     exec { "init-antler-ve":
         command => "${dev_path}/init_virtualenv.sh antler",
         cwd     => "${dev_path}",
-        require => [Pip::Pip_package["virtualenv"], Package["gcc"], Package["python-dev"]],
+        require => [Pip::Pip_package["virtualenv"], Package["gcc"], Package["python-dev"], File["vagrant_antler_init_virtualenv.sh"]],
         creates => "${dev_path}/antler_ve",
         before  => Apache::Wsgi_host["antler"],
+    }
+
+    exec { "migrate-antler-db":
+        command => "${dev_path}/antler_ve/bin/python ${dev_path}/antler/manage.py syncdb --migrate --noinput",
+        cwd     => "${dev_path}",
+        require => [Exec["init-antler-ve"], File["/home/antler/releases/dev"]]
     }
     
     file { "/home/antler/regenerate.py":
@@ -113,6 +119,8 @@ if $vagrant {
         mode    => "0755",
         content => template("project/regenerate.py"),
     }
+
+
 }
 
 include pip
@@ -160,3 +168,17 @@ $modules = ["CSS::Prepare", "JavaScript::Prepare", "Capture::Tiny",
             "Config::Std", "Proc::Fork"]
 
 cpan_module { $modules: }
+
+exec { "install-pipe-runner":
+    require => [Exec["cpan-module-CSS::Prepare"], Exec["cpan-module-JavaScript::Prepare"]],
+    command => "/usr/bin/curl http://cpan.fort/pipe_runner > /usr/local/bin/pipe_runner",
+    creates => "/usr/local/bin/pipe_runner"
+}
+
+file { "/usr/local/bin/pipe_runner":
+    require => Exec["install-pipe-runner"],
+    ensure  => file,
+    mode    => "0755",
+}
+
+
