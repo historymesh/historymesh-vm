@@ -160,39 +160,3 @@ $modules = ["CSS::Prepare", "JavaScript::Prepare", "Capture::Tiny",
             "Config::Std", "Proc::Fork"]
 
 cpan_module { $modules: }
-
-$pipe_runner = "/usr/local/bin/pipe_runner"
-
-exec { "download-pipe-runner":
-    command => "/usr/bin/curl http://cpan.fort/pipe_runner >${pipe_runner}",
-    creates => "${pipe_runner}",
-}
-
-file { "${pipe_runner}":
-    owner   => "root",
-    group   => "admin",
-    mode    => "0755",
-    require => Exec["download-pipe-runner"],
-}
-
-package { "supervisor": ensure => installed }
-
-service { "supervisor": ensure => running }
-
-define supervisor_process($command, $directory='') {
-    file { "/etc/supervisor/conf.d/${name}.conf":
-        ensure  => file,
-        owner   => "root",
-        group   => "root",
-        mode    => "0644",
-        content => template("supervisor/process"),
-        
-        require => Package["supervisor"],
-        notify  => Service["supervisor"],
-    }
-}
-
-supervisor_process { "pipe_runner":
-    command   => "${pipe_runner} pipe_runner.conf",
-    directory => "${current_release_path}",
-}
