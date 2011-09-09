@@ -8,31 +8,43 @@ $vagrant = $domain ? {
     default         => false,
 }
 
-file { "/etc/apt/sources.list.d/fort.list":
+$onafort = false
 
-    ensure  => present,
-    owner   => "root",
-    group   => "root",
-    content => template("apt/fort.list"),
-    before  => Exec["apt-get-update"],
-    notify  => Exec["apt-get-update"],
+if $onafort {
+    file { "/etc/apt/sources.list.d/fort.list":
+        ensure  => present,
+        owner   => "root",
+        group   => "root",
+        content => template("apt/fort.list"),
+        before  => Exec["apt-get-update"],
+        notify  => Exec["apt-get-update"],
+    }
 }
 
 exec { "apt-get-update":
-    command     => "/usr/bin/apt-get update",
-    refreshonly => true,
+    command => "/usr/bin/apt-get update",
+    /* Don't bother running this if we have a recent package cache */
+    unless  => "/usr/bin/find /var/cache/apt/ -name pkgcache.bin -mtime -7 | /bin/grep .",
 }
 
 Package {
     require => Exec["apt-get-update"],
 }
 
+include pip
+include postgres
+include project
+include apache
+
+
 if $vagrant {
-    file { "/home/vagrant/.gemrc":
-        ensure  => present,
-        owner   => "vagrant",
-        group   => "vagrant",
-        content => template("rubygems/gemrc"),
+    if $onafort {
+        file { "/home/vagrant/.gemrc":
+            ensure  => present,
+            owner   => "vagrant",
+            group   => "vagrant",
+            content => template("rubygems/gemrc"),
+        }
     }
     
     file { "/home/vagrant/kick":
@@ -49,7 +61,12 @@ if $vagrant {
         group   => "vagrant",
         content => "alias st='git status'",
     }
+    
+    pip::pip_config { "vagrant-pip-config":
+        user  => "vagrant",
+    }
 }
+
 
 $packages = ["rubygems1.8", "git", "zlib1g-dev", "libreadline-dev",
              "libcurl4-openssl-dev", "python-imaging", "gcc", "python-dev"]
@@ -57,6 +74,7 @@ $packages = ["rubygems1.8", "git", "zlib1g-dev", "libreadline-dev",
 package { $packages:
     ensure  => present,
 }
+
 
 file { "/var/lib/gems/1.8":
     require => Package["rubygems1.8"],
@@ -69,7 +87,11 @@ file { "/var/lib/gems/1.8":
 $gem_source = "http://gems.fort"
 
 define gem() {
-    exec { "/usr/bin/gem install --source ${gem_source} ${name}":
+    exec { "install-gem-${name}":
+        command => $onafort ? {
+            true  => "/usr/bin/gem install --source ${gem_source} ${name}",
+            false => "/usr/bin/gem install ${name}",
+        },
         /* Don't bother if we already have a gem by the same name */
         unless  => "/usr/bin/gem list ${name} | /bin/grep .",
         require => Package["rubygems1.8"],
@@ -78,14 +100,10 @@ define gem() {
 
 gem { "bundler": }
 
-include postgres
-
 postgres::postgres_user { "antler": create_db => true }
 postgres::postgres_db { "antler":
     owner => "antler",
 }
-
-include project
 
 project::project { "antler": }
 
@@ -146,20 +164,30 @@ package { ["curl", "perl"]:
 
 exec { "download-cpanm":
     require => Package["curl"],
-    command => "/usr/bin/curl http://cpan.fort/cpanm >/tmp/cpanm",
-    creates => "/tmp/cpanm",
+    command => $onafort ? {
+        true  => "/usr/bin/curl http://cpan.fort/cpanm >/tmp/cpanm",
+        false => "/usr/bin/curl -L  http://cpanmin.us >/tmp/cpanm",
+    },
+    /* Check the download file exists _and is non-empty_ */
+    unless => "/usr/bin/test -s /tmp/cpanm",
 }
 
 exec { "setup-cpanm":
     require => [Exec["download-cpanm"], Package["perl"]],
-    command => "/usr/bin/perl /tmp/cpanm --self-upgrade --mirror http://cpan.fort/ --mirror-only",
+    command => $onafort ? {
+        true  => "/usr/bin/perl /tmp/cpanm --self-upgrade --mirror http://cpan.fort/ --mirror-only",
+        false => "/usr/bin/perl /tmp/cpanm --self-upgrade",
+    },
     creates => "/usr/local/bin/cpanm",
 }
 
 define cpan_module() {
     exec { "cpan-module-${name}":
         require => Exec["setup-cpanm"],
-        command => "/usr/local/bin/cpanm -f --mirror http://cpan.fort/ --mirror-only ${name}",
+        command => $onafort ? {
+            true  => "/usr/local/bin/cpanm -f --mirror http://cpan.fort/ --mirror-only ${name}",
+            false => "/usr/local/bin/cpanm -f ${name}",
+        },
         unless  => "/usr/bin/perl -e 'require ${name}'",
     }
 }
@@ -169,16 +197,21 @@ $modules = ["CSS::Prepare", "JavaScript::Prepare", "Capture::Tiny",
 
 cpan_module { $modules: }
 
+$pipe_runner_url = $onafort ? {
+    true  => "http://cpan.fort/pipe_runner",
+    false => "https://raw.github.com/gist/912802/a8f3d25cc243cde1e4d752b87afe9ad7f772d5ef/pipe_runner",
+}
+
 exec { "install-pipe-runner":
     require => [Exec["cpan-module-CSS::Prepare"], Exec["cpan-module-JavaScript::Prepare"]],
-    command => "/usr/bin/curl http://cpan.fort/pipe_runner > /usr/local/bin/pipe_runner",
-    creates => "/usr/local/bin/pipe_runner"
+    command => "/usr/bin/curl ${pipe_runner_url} > /usr/local/bin/pipe_runner",
+    unless  => "/usr/bin/test -s /usr/local/bin/pipe_runner",
 }
 
 file { "/usr/local/bin/pipe_runner":
     require => Exec["install-pipe-runner"],
     ensure  => file,
+    owner   => "root",
+    group   => "root",
     mode    => "0755",
 }
-
-
