@@ -131,14 +131,6 @@ if $vagrant {
         require => [Exec["init-antler-ve"], File["/home/antler/releases/dev"]]
     }
     
-    file { "/home/antler/regenerate.py":
-        ensure  => file,
-        owner   => "antler",
-        group   => "admin",
-        mode    => "0755",
-        content => template("project/regenerate.py"),
-    }
-    
     file { "${dev_path}/cgi-bin":
         ensure => directory,
         owner  => "antler",
