@@ -121,7 +121,8 @@ if $vagrant {
         cwd     => "${dev_path}",
         require => [Pip::Pip_package["virtualenv"], Package["gcc"], Package["python-dev"], File["vagrant_antler_init_virtualenv.sh"]],
         creates => "${dev_path}/antler_ve",
-        before  => Apache::Wsgi_host["antler"],
+        /* This file is shared by the standard WSGI host and the piper one */
+        before  => File["/etc/apache2/sites-enabled/antler"],
     }
 
     exec { "migrate-antler-db":
@@ -137,6 +138,21 @@ if $vagrant {
         mode    => "0755",
         content => template("project/regenerate.py"),
     }
+    
+    file { "${dev_path}/cgi-bin":
+        ensure => directory,
+        owner  => "antler",
+        group  => "admin",
+        mode   => "0755",
+    }
+    
+    file { "${dev_path}/cgi-bin/piedpiper.py":
+        ensure => file,
+        owner  => "antler",
+        group  => "admin",
+        mode   => "0755",
+        source => "puppet:///modules/piedpiper/piedpiper.py",
+    }
 
 
 }
@@ -149,9 +165,19 @@ $current_release_path = "/home/antler/releases/current"
 
 include apache
 
-apache::wsgi_host { "antler":
-    host      => 'antler.dev',
-    wsgi_path => "${current_release_path}/antler/configs/development/antler.wsgi",
+if $vagrant {
+    apache::piedpiper_host { "antler":
+        host        => 'antler.dev',
+        wsgi_path   => "${current_release_path}/antler/configs/development/antler.wsgi",
+        cgi_path    => "${dev_path}/cgi-bin/",
+        piped_paths => ["static/css/screen.css", "static/js/common.js"],
+    }
+}
+else {
+    apache::wsgi_host { "antler":
+        host      => 'antler.dev',
+        wsgi_path => "${current_release_path}/antler/configs/development/antler.wsgi",
+    }
 }
 
 
