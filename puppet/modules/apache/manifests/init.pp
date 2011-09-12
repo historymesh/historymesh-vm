@@ -27,6 +27,8 @@ class apache {
             ensure => present,
             ip     => "127.0.0.1",
         }
+        
+        realize File["/etc/apache2/sites-enabled"]
     }
     
     define piedpiper_host($host, $wsgi_path, $cgi_path, $aliases=[], $piped_paths=[]) {
@@ -51,6 +53,7 @@ class apache {
         }
         
         realize Apache::Module["rewrite"]
+        realize File["/etc/apache2/sites-enabled"]
     }
     
     define module() {
@@ -62,4 +65,12 @@ class apache {
     }
     
     @module { "rewrite": }
+    
+    @file { "/etc/apache2/sites-enabled":
+        require => Package["apache2"],
+        ensure  => directory,
+        recurse => true,
+        purge   => true,
+        notify  => Service["apache2"],
+    }
 }
