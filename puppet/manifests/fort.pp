@@ -146,8 +146,13 @@ if $vagrant {
         mode   => "0755",
         source => "puppet:///modules/piedpiper/piedpiper.py",
     }
-
-
+    
+    project::fixture { "antler-data":
+        project => "antler",
+        fixture => "live_data",
+        mainapp => "core",
+        require => Exec["migrate-antler-db"],
+    }
 }
 
 include pip

@@ -24,11 +24,12 @@ class project {
         }
         
         file { "/home/${name}/${name}":
+            /* Shortcut script to run project management commands */
             ensure  => file,
             owner   => "${name}",
             group   => "admin",
             mode    => "775",
-            content => "releases/current/${name}_ve/bin/python releases/current/${name}/manage.py $*",
+            content => "#!/bin/bash\n\n/home/${name}/releases/current/${name}_ve/bin/python /home/${name}/releases/current/${name}/manage.py $*",
         }
     }
     
@@ -65,6 +66,15 @@ class project {
                 ""      => "/home/vagrant/${name}",
                 default => "/home/vagrant/${prefix}/${name}"
             },
+        }
+    }
+    
+    define fixture($project, $fixture, $mainapp) {
+        exec { "/home/${project}/${project} loaddata ${fixture}":
+            /* Don't load the fixture if there are any data in the main app */
+            onlyif      => "/usr/bin/test `/home/${project}/${project} dumpdata ${mainapp}` = '[]'",
+            require     => [File["/home/${project}/${project}"],
+                            Postgres::Postgres_db["${project}"]],
         }
     }
 }
