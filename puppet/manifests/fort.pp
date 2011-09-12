@@ -119,8 +119,9 @@ if $vagrant {
     exec { "init-antler-ve":
         command => "${dev_path}/init_virtualenv.sh antler",
         cwd     => "${dev_path}",
-        require => [Pip::Pip_package["virtualenv"], Package["gcc"], Package["python-dev"], File["vagrant_antler_init_virtualenv.sh"]],
-        creates => "${dev_path}/antler_ve",
+        require => [Pip::Pip_package["virtualenv"], Package["gcc"],
+                    Package["python-dev"], Project::Vagrant_dev["antler"]],
+        creates => "${dev_path}/antler_ve/.init_ok",
         /* This file is shared by the standard WSGI host and the piper one */
         before  => File["/etc/apache2/sites-enabled/antler"],
     }
