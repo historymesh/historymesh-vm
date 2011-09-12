@@ -29,7 +29,7 @@ class project {
             owner   => "${name}",
             group   => "admin",
             mode    => "775",
-            content => "#!/bin/bash\n\n/home/${name}/releases/current/${name}_ve/bin/python /home/${name}/releases/current/${name}/manage.py $*",
+            content => template("project/manage"),
         }
     }
     
