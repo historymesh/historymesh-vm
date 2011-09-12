@@ -111,7 +111,7 @@ if $vagrant {
     project::vagrant_dev { "antler":
         active      => true,
         links       => ["antler", "init_virtualenv.sh", "pipe_runner.conf"],
-        link_prefix => "fort6",
+        link_prefix => "historymesh",
     }
     
     $dev_path = "/home/antler/releases/dev"

@@ -15,7 +15,7 @@ Vagrant::Config.run do |config|
   # an identifier, the second is the path on the guest to mount the
   # folder, and the third is the path on the host to the actual folder.
   # config.vm.share_folder "v-data", "/vagrant_data", "../data"
-  config.vm.share_folder("fort6", "/home/vagrant/fort6", "fort6")
+  config.vm.share_folder("historymesh", "/home/vagrant/historymesh", "historymesh")
   
   config.vm.provision :puppet do |puppet|
     puppet.manifests_path = "puppet/manifests"
