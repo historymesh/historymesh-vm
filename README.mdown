@@ -51,5 +51,13 @@ If anyone wants to get auto-reloading working with Apache and `mod_wsgi`,
 Troubleshooting
 ---------------
 
-Come and poke me (Fatty) on IRC or email; as problems crop up, I'll add them to
-this file.
+If something does go wrong with the initial setup, you may be able to recover
+by running:
+
+    vagrant provision
+
+This should run through the Puppet configuration, applying anything that didn't
+get set up correctly the first time.
+
+Failing that, come and poke me (Fatty) on IRC or email; as problems crop up,
+I'll add them to this file.
