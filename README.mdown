@@ -1,0 +1,52 @@
+Steps to install
+----------------
+
+ 1. Set up Vagrant by following [their instructions](http://vagrantup.com/docs/getting-started/index.html).
+
+ 2. Clone the `historymesh-vm` repository, either from the command line:
+    
+        git clone git@github.com:historymesh/historymesh.git
+    
+    or by using the [Github Mac client](http://mac.github.com/).
+
+ 3. Clone the `historymesh` repository in the same way.
+
+ 4. Symlink the `historymesh` repository by opening up a terminal and running:
+    
+        ln -s ../historymesh
+    
+    or whatever the path is to your `historymesh` directory.
+
+ 5. Go to the `historymesh-vm` directory and run:
+    
+        vagrant up
+    
+    This should download the base box (about 300 MB), then launch and set up
+    the development box. This should take about 10 to 15 minutes. You should
+    see a large number of blue status messages, signifying successful steps.
+    Any pink messages suggest something has gone wrong. A few of the steps will
+    take a couple of minutes, during which time nothing will appear to happen;
+    this is normal.
+
+ 6. In your browser, go to <http://localhost:8062>. You should see the site
+    home page, complete with stories and styling. If not, something has gone
+    wrong in the setup.
+
+
+Editing
+-------
+
+You should be able to edit on your local machine, using your text editor of
+choice. Changes in templates, CSS and JavaScript should be reflected immediately
+on the server, but code changes will require a server restart, as follows:
+
+    cd historymesh-vm
+    vagrant ssh
+    ./kick
+
+
+Troubleshooting
+---------------
+
+Come and poke me (Fatty) on IRC or email; as problems crop up, I'll add them to
+this file.
