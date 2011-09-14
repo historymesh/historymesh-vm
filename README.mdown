@@ -44,6 +44,9 @@ on the server, but code changes will require a server restart, as follows:
     vagrant ssh
     ./kick
 
+If anyone wants to get auto-reloading working with Apache and `mod_wsgi`,
+[knock yourself out](http://code.google.com/p/modwsgi/wiki/ReloadingSourceCode).
+
 
 Troubleshooting
 ---------------
