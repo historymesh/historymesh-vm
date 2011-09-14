@@ -11,7 +11,8 @@ Steps to install
 
  3. Clone the `historymesh` repository in the same way.
 
- 4. Symlink the `historymesh` repository by opening up a terminal and running:
+ 4. Symlink the `historymesh` repository by opening up a terminal, changing to
+    the `historymesh-vm` directory and running:
     
         ln -s ../historymesh
     
