@@ -119,6 +119,8 @@ if $vagrant {
     exec { "init-antler-ve":
         command => "${dev_path}/init_virtualenv.sh antler",
         cwd     => "${dev_path}",
+        timeout => 600, /* This takes a while */
+        tries   => 2,
         require => [Pip::Pip_package["virtualenv"], Package["gcc"],
                     Package["python-dev"], Project::Vagrant_dev["antler"]],
         creates => "${dev_path}/antler_ve/.init_ok",
