@@ -5,7 +5,7 @@ Steps to install
 
  2. Clone the `historymesh-vm` repository, either from the command line:
     
-        git clone git@github.com:historymesh/historymesh.git
+        git clone git@github.com:historymesh/historymesh-vm.git
     
     or by using the [Github Mac client](http://mac.github.com/).
 
