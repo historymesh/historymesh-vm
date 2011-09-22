@@ -1,0 +1,25 @@
+<VirtualHost *:80>
+    ServerName <%= host %>
+    <% aliases.each do |server_alias| -%>
+    ServerAlias <%= server_alias %>
+    <% end -%>
+    
+    ScriptAlias /cgi-bin/ <%= cgi_path %>
+    AddHandler cgi-script .py
+    <Directory <%= cgi_path %>>
+        Order allow,deny
+        Allow from all
+    </Directory>
+    
+    RewriteEngine On
+    # PT flag in rewrite rules allows conjunction with ScriptAlias
+    <% piped_paths.each do |piped_path| -%>
+    RewriteRule ^/(<%= piped_path %>)$ /cgi-bin/piedpiper.py?path=$1 [PT]
+    <% end -%>
+    
+    WSGIPassAuthorization On
+    WSGIScriptAlias / <%= wsgi_path %>
+        ErrorLog /var/log/apache2/<%= name %>-error.log
+        CustomLog /var/log/apache2/<%= name %>-access.log combined
+    
+</VirtualHost>

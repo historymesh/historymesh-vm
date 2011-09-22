@@ -1,0 +1,5 @@
+#!/bin/bash
+set -e
+
+cd /home/<%= name %>/releases/current
+<%= name %>_ve/bin/python <%= name %>/manage.py $*
