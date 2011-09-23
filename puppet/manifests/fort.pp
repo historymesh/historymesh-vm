@@ -245,23 +245,56 @@ file { "/usr/local/bin/pipe_runner":
 
 # restpose
 
-package { ["libxapian-dev", "uuid-dev", "libgcrypt11", "libgcrypt11-dev"]:
+package { ["libxapian-dev", "uuid-dev", "libgcrypt11", "libgcrypt11-dev", "autoconf", "libtool", "texinfo"]:
   ensure => present
 }
 
-$restpose = "restpose-0.7.2"
+$restpose = "r0.7.2"
+
+exec { "prep-restpose":
+   command => "/bin/rm -rf /tmp/${restpose}",
+   cwd => "/tmp",
+   before => Exec["fetch-restpose"]
+}
+
+exec { "fetch-restpose":
+   require => Package["curl"],
+   command => "/usr/bin/curl -o ${restpose}.tar.gz https://nodeload.github.com/rboulton/restpose/tarball/${restpose}",
+   cwd => "/tmp",
+   before => Exec["extract-restpose"]
+}
 
 exec { "extract-restpose":
-    require => [Package["libxapian-dev"], Package["uuid-dev"], Package["libgcrypt11"], Package["libgcrypt11-dev"], Package["curl"]],
-    command => "/usr/bin/curl -O http://assets.fort/sources.downloaded/restpose/${restpose}.tar.gz && /bin/tar xvf restpose-0.7.2.tar.gz",
+    command => "/bin/tar xvf ${restpose}.tar.gz",
     cwd => "/tmp",
-    before => Exec["build-restpose"],
-    unless => "/usr/bin/test -f /usr/local/bin/restpose"
+    before => Exec["bootstrap-restpose"],
+}
+
+file { "/tmp/${restpose}":
+    ensure => link,
+    target => "/tmp/rboulton-restpose-117a097"
+}
+
+file { "/tmp/${restpose}/bootstrap": }
+
+exec { "bootstrap-restpose":
+    require => [Exec["extract-restpose"], Package["autoconf", "libtool"], File["/tmp/${restpose}/bootstrap"]],
+    command => "/tmp/${restpose}/bootstrap",
+    cwd => "/tmp/${restpose}",
+    creates => "/tmp/${restpose}/configure"
+}
+
+file { "/tmp/${restpose}/configure": }
+
+exec { "configure-restpose":
+    require => [File["/tmp/${restpose}/configure"], Package["libxapian-dev", "uuid-dev", "libgcrypt11", "libgcrypt11-dev"]],
+    command => "/tmp/${restpose}/configure",
+    cwd => "/tmp/${restpose}",
+    creates => "/tmp/${restpose}/Makefile"
 }
 
 exec { "build-restpose":
-    require => Exec["extract-restpose"],
-    command => "/tmp/${restpose}/configure && /usr/bin/make install",
-    cwd => "/tmp/${restpose}",
-    creates => "/usr/local/bin/restpose"
+    require => [Exec["configure-restpose"], Package["texinfo"]],
+    command => "/usr/bin/make",
+    cwd => "/tmp/${restpose}"
 }
