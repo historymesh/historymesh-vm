@@ -249,30 +249,32 @@ package { ["libxapian-dev", "uuid-dev", "libgcrypt11", "libgcrypt11-dev", "autoc
   ensure => present
 }
 
-$restpose = "r0.7.2"
+$restpose = "rboulton-restpose-117a097"
 
 exec { "prep-restpose":
    command => "/bin/rm -rf /tmp/${restpose}",
    cwd => "/tmp",
-   before => Exec["fetch-restpose"]
+   before => Exec["fetch-restpose"],
+   unless => "/usr/bin/test -f /usr/local/bin/restpose"
 }
 
 exec { "fetch-restpose":
    require => Package["curl"],
-   command => "/usr/bin/curl -o ${restpose}.tar.gz https://nodeload.github.com/rboulton/restpose/tarball/${restpose}",
+   command => "/usr/bin/curl -o ${restpose}.tar.gz https://nodeload.github.com/rboulton/restpose/tarball/r0.7.2",
    cwd => "/tmp",
-   before => Exec["extract-restpose"]
+   before => Exec["extract-restpose"],
+   unless => "/usr/bin/test -f /usr/local/bin/restpose"
 }
 
 exec { "extract-restpose":
-    command => "/bin/tar xvf ${restpose}.tar.gz",
+    command => "/bin/tar xzf ${restpose}.tar.gz",
     cwd => "/tmp",
     before => Exec["bootstrap-restpose"],
+    unless => "/usr/bin/test -f /usr/local/bin/restpose"
 }
 
 file { "/tmp/${restpose}":
-    ensure => link,
-    target => "/tmp/rboulton-restpose-117a097"
+    require => Exec["extract-restpose"]
 }
 
 file { "/tmp/${restpose}/bootstrap": }
@@ -281,20 +283,25 @@ exec { "bootstrap-restpose":
     require => [Exec["extract-restpose"], Package["autoconf", "libtool"], File["/tmp/${restpose}/bootstrap"]],
     command => "/tmp/${restpose}/bootstrap",
     cwd => "/tmp/${restpose}",
-    creates => "/tmp/${restpose}/configure"
+    creates => "/tmp/${restpose}/configure",
+    before => Exec["configure-restpose"]
 }
 
 file { "/tmp/${restpose}/configure": }
 
 exec { "configure-restpose":
-    require => [File["/tmp/${restpose}/configure"], Package["libxapian-dev", "uuid-dev", "libgcrypt11", "libgcrypt11-dev"]],
-    command => "/tmp/${restpose}/configure",
+    require => [File["/tmp/${restpose}", "/tmp/${restpose}/configure"], Package["libxapian-dev", "uuid-dev", "libgcrypt11", "libgcrypt11-dev"]],
+    command => "/tmp/${restpose}/configure --enable-static=yes",
     cwd => "/tmp/${restpose}",
-    creates => "/tmp/${restpose}/Makefile"
+    creates => "/tmp/${restpose}/Makefile",
+    before => Exec["build-restpose"]
 }
 
+file { "/tmp/${restpose}/Makefile": }
+
 exec { "build-restpose":
-    require => [Exec["configure-restpose"], Package["texinfo"]],
-    command => "/usr/bin/make",
-    cwd => "/tmp/${restpose}"
+    require => [File["/tmp/${restpose}", "/tmp/${restpose}/Makefile"], Package["texinfo"]],
+    command => "/usr/bin/make install",
+    cwd => "/tmp/${restpose}",
+    creates => "/usr/local/bin/restpose"
 }
