@@ -135,6 +135,12 @@ if $vagrant {
                     Postgres::Postgres_db["antler"]]
     }
    
+    exec { "antler-reindex":
+        command => "${dev_path}/antler_ve/bin/python ${dev_path}/antler/manage.py reindex",
+        cwd     => "${dev_path}",
+        require => [Exec["migrate-antler-db"], Service["restpose"]],
+    }
+    
     file { "${dev_path}/cgi-bin":
         ensure => directory,
         owner  => "antler",
