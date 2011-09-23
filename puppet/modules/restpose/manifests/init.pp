@@ -34,7 +34,8 @@ class restpose {
     /* This is basically crazy, and builds restpose from a github-based
      * download in-situ. Packages are good things. */
 
-    package { ["libxapian-dev", "uuid-dev", "libgcrypt11", "libgcrypt11-dev", "autoconf", "libtool", "texinfo"]:
+    package { ["libxapian-dev", "uuid-dev", "libgcrypt11", "libgcrypt11-dev",
+               "autoconf", "libtool", "texinfo", "libmicrohttpd5"]:
       ensure => present
     }
 
