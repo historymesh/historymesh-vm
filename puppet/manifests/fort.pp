@@ -131,7 +131,8 @@ if $vagrant {
     exec { "migrate-antler-db":
         command => "${dev_path}/antler_ve/bin/python ${dev_path}/antler/manage.py syncdb --migrate --noinput",
         cwd     => "${dev_path}",
-        require => [Exec["init-antler-ve"], File["/home/antler/releases/dev"]]
+        require => [Exec["init-antler-ve"], File["/home/antler/releases/dev"],
+                    Postgres::Postgres_db["antler"]]
     }
    
     file { "${dev_path}/cgi-bin":
