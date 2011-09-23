@@ -1,8 +1,22 @@
+define upstart_service($ensure="running") {
+    /* Workaround for versions of Puppet without support for Upstart */
+    service { "${name}":
+        ensure     => "${ensure}",
+        start      => "/sbin/initctl start ${name}",
+        stop       => "/sbin/initctl stop ${name}",
+        hasrestart => true,
+        restart    => "/sbin/initctl restart ${name}",
+        /* initctl doesn't seem to bother with standard statuses */
+        hasstatus  => true,
+        status     => "/sbin/initctl status ${name} | /bin/grep 'start/running'",
+    }
+}
+
 class restpose {
 
-    service { "restpose":
+    upstart_service { "restpose":
       ensure => running,
-      require => File["/etc/init/restpose.conf"]
+      require => File["/etc/init/restpose.conf"],
     }
     
     file { "/etc/init/restpose.conf":
