@@ -18,7 +18,11 @@ class restpose {
       ensure => running,
       require => File["/etc/init/restpose.conf"],
     }
-    
+
+    package { "g++":
+        ensure => installed,
+    }
+
     file { "/etc/init/restpose.conf":
       ensure => present,
       owner => "root",
@@ -94,11 +98,13 @@ class restpose {
     file { "/tmp/${restpose}/configure": }
 
     exec { "configure-restpose":
-        require => [File["/tmp/${restpose}", "/tmp/${restpose}/configure"], Package["libxapian-dev", "uuid-dev", "libgcrypt11", "libgcrypt11-dev"]],
+        require => [File["/tmp/${restpose}", "/tmp/${restpose}/configure"],
+                    Package["libxapian-dev", "uuid-dev", "libgcrypt11", "libgcrypt11-dev", "g++"]],
         command => "/tmp/${restpose}/configure --enable-static=yes",
-        cwd => "/tmp/${restpose}",
+        cwd     => "/tmp/${restpose}",
+        path    => ["/bin", "/usr/bin"],
         creates => "/tmp/${restpose}/Makefile",
-        before => Exec["build-restpose"]
+        before  => Exec["build-restpose"]
     }
 
     file { "/tmp/${restpose}/Makefile": }
