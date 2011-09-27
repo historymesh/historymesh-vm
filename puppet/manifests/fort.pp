@@ -38,15 +38,6 @@ include apache
 include restpose
 
 if $vagrant {
-    if $onafort {
-        file { "/home/vagrant/.gemrc":
-            ensure  => present,
-            owner   => "vagrant",
-            group   => "vagrant",
-            content => template("rubygems/gemrc"),
-        }
-    }
-    
     file { "/home/vagrant/kick":
         ensure  => file,
         owner   => "vagrant",
@@ -68,37 +59,12 @@ if $vagrant {
 }
 
 
-$packages = ["rubygems1.8", "git", "zlib1g-dev", "libreadline-dev",
-             "libcurl4-openssl-dev", "python-imaging", "gcc", "python-dev"]
+$packages = ["git", "zlib1g-dev", "libreadline-dev", "libcurl4-openssl-dev",
+             "python-imaging", "gcc", "python-dev"]
 
 package { $packages:
     ensure  => present,
 }
-
-
-file { "/var/lib/gems/1.8":
-    require => Package["rubygems1.8"],
-    owner   => "root",
-    group   => "admin",
-    /* Allow anyone in the admin group to install gems */
-    mode    => "0775",
-}
-
-$gem_source = "http://gems.fort"
-
-define gem() {
-    exec { "install-gem-${name}":
-        command => $onafort ? {
-            true  => "/usr/bin/gem install --source ${gem_source} ${name}",
-            false => "/usr/bin/gem install ${name}",
-        },
-        /* Don't bother if we already have a gem by the same name */
-        unless  => "/usr/bin/gem list ${name} | /bin/grep .",
-        require => Package["rubygems1.8"],
-    }
-}
-
-gem { "bundler": }
 
 postgres::postgres_user { "antler": create_db => true }
 postgres::postgres_db { "antler":
