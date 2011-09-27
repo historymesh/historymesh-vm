@@ -49,7 +49,7 @@ class restpose {
      * download in-situ. Packages are good things. */
 
     package { ["libxapian-dev", "uuid-dev", "libgcrypt11", "libgcrypt11-dev",
-               "autoconf", "libtool", "texinfo", "libmicrohttpd5"]:
+               "autoconf", "libtool", "texinfo"]:
       ensure => present
     }
 
