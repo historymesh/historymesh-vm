@@ -167,8 +167,9 @@ exec { "download-cpanm":
         true  => "/usr/bin/curl http://cpan.fort/cpanm >/tmp/cpanm",
         false => "/usr/bin/curl -L  http://cpanmin.us >/tmp/cpanm",
     },
-    /* Check the download file exists _and is non-empty_ */
-    unless => "/usr/bin/test -s /tmp/cpanm",
+    /* Check the download file exists _and is non-empty_.
+     * Also don't bother downloading if cpanm is installed */
+    unless => "/usr/bin/test -s /tmp/cpanm -o -s /usr/local/bin/cpanm",
 }
 
 exec { "setup-cpanm":
