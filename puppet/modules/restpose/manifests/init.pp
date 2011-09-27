@@ -29,7 +29,8 @@ class restpose {
       group => "root",
       mode => "0644",
       source => "puppet:///modules/restpose/restpose.conf",
-      require => [Exec["build-restpose"], File["/var/lib/restpose"], Package["daemontools"], User["restpose"]]
+      require => [Exec["build-restpose"], File["/var/lib/restpose"], Package["daemontools"], User["restpose"]],
+      notify => Service["restpose"]
     }
 
     user { "restpose":
