@@ -191,27 +191,6 @@ define cpan_module() {
     }
 }
 
-$modules = ["CSS::Prepare", "JavaScript::Prepare", "Capture::Tiny",
-            "Config::Std", "Proc::Fork"]
+$modules = ["CSS::Prepare", "JavaScript::Prepare"]
 
 cpan_module { $modules: }
-
-$pipe_runner_url = $onafort ? {
-    true  => "http://cpan.fort/pipe_runner",
-    false => "https://raw.github.com/gist/912802/a8f3d25cc243cde1e4d752b87afe9ad7f772d5ef/pipe_runner",
-}
-
-exec { "install-pipe-runner":
-    require => [Exec["cpan-module-CSS::Prepare"], Exec["cpan-module-JavaScript::Prepare"]],
-    command => "/usr/bin/curl ${pipe_runner_url} > /usr/local/bin/pipe_runner",
-    unless  => "/usr/bin/test -s /usr/local/bin/pipe_runner",
-}
-
-file { "/usr/local/bin/pipe_runner":
-    require => Exec["install-pipe-runner"],
-    ensure  => file,
-    owner   => "root",
-    group   => "root",
-    mode    => "0755",
-}
-
