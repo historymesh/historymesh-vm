@@ -64,7 +64,7 @@ class restpose {
        command => "/bin/rm -rf /tmp/${restpose}",
        cwd => "/tmp",
        before => Exec["fetch-restpose"],
-       unless => "/usr/bin/test -f /usr/local/bin/restpose"
+       unless => "/usr/bin/test -f /usr/local/bin/restpose",
     }
 
     exec { "fetch-restpose":
@@ -72,14 +72,14 @@ class restpose {
        command => "/usr/bin/curl -o ${restpose}.tar.gz https://nodeload.github.com/rboulton/restpose/tarball/r0.7.2",
        cwd => "/tmp",
        before => Exec["extract-restpose"],
-       unless => "/usr/bin/test -f /usr/local/bin/restpose"
+       unless => "/usr/bin/test -f /usr/local/bin/restpose",
     }
 
     exec { "extract-restpose":
         command => "/bin/tar xzf ${restpose}.tar.gz",
         cwd => "/tmp",
         before => Exec["bootstrap-restpose"],
-        unless => "/usr/bin/test -f /usr/local/bin/restpose"
+        unless => "/usr/bin/test -f /usr/local/bin/restpose",
     }
 
     file { "/tmp/${restpose}":
@@ -93,7 +93,8 @@ class restpose {
         command => "/tmp/${restpose}/bootstrap",
         cwd => "/tmp/${restpose}",
         creates => "/tmp/${restpose}/configure",
-        before => Exec["configure-restpose"]
+        before => Exec["configure-restpose"],
+        unless => "/usr/bin/test -f /usr/local/bin/restpose",
     }
 
     file { "/tmp/${restpose}/configure": }
@@ -105,7 +106,8 @@ class restpose {
         cwd     => "/tmp/${restpose}",
         path    => ["/bin", "/usr/bin"],
         creates => "/tmp/${restpose}/Makefile",
-        before  => Exec["build-restpose"]
+        before  => Exec["build-restpose"],
+        unless => "/usr/bin/test -f /usr/local/bin/restpose",
     }
 
     file { "/tmp/${restpose}/Makefile": }
@@ -115,5 +117,6 @@ class restpose {
         command => "/usr/bin/make install",
         cwd => "/tmp/${restpose}",
         creates => "/usr/local/bin/restpose",
+        unless => "/usr/bin/test -f /usr/local/bin/restpose",
     }
 }
